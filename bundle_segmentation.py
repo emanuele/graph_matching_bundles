@@ -1,5 +1,5 @@
 import numpy as np
-from DSPFP import DSPFP_faster_K
+from DSPFP import DSPFP_faster_K, greedy_assignment
 
 
 def graph_matching(S_A, S_B, distance, alpha=0.5, max_iter1=100,
@@ -73,3 +73,29 @@ def graph_matching(S_A, S_B, distance, alpha=0.5, max_iter1=100,
     unassigned = (ga.sum(0) == 0)
     corresponding_streamlines[unassigned] = -1
     return corresponding_streamlines
+
+
+if __name__ == '__main__':
+    np.random.seed(0)
+
+    n_A = 100 # 1000
+    n_B = 100 # 10000
+    d = 2
+
+    A = np.random.uniform(size=(n_A, d))
+    B = A + np.random.normal(size=(n_A, d)) * 0.01
+
+    from functools import partial
+    from distances import euclidean_distance, parallel_distance_computation
+    distance = partial(parallel_distance_computation, distance=euclidean_distance)
+
+    corresponding_streamlines = graph_matching(A, B, distance)
+
+    import matplotlib.pyplot as plt
+    plt.interactive(True)
+    plt.figure()
+    plt.plot(A[:, 0], A[:, 1], 'ro')
+    for i in range(n_A):
+        plt.arrow(A[i, 0], A[i, 1], B[corresponding_streamlines[i], 0] - A[i, 0], B[corresponding_streamlines[i], 1] - A[i, 1], head_width=0.01, head_length=0.01, fc='g', ec='g', length_includes_head=True)
+
+    plt.plot(B[:, 0], B[:, 1], 'bo')
