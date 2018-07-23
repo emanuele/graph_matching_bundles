@@ -136,8 +136,6 @@ def DSPFP_faster_K(A, B, K=0.0, lam=0.5, alpha=0.5, threshold1=1.0e-6,
     if Y is None:
         Y = np.zeros((size1, size1))
 
-    # K = np.atleast_2d(C).dot(np.atleast_2d(D).T)
-
     float_max = float_info.max
     epsilon1 = epsilon2 = float_max
     iter1 = 0
