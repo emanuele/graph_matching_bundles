@@ -2,8 +2,8 @@ import numpy as np
 from DSPFP import DSPFP_faster_K, greedy_assignment
 
 
-def graph_matching(S_A, S_B, distance, alpha=0.5, max_iter1=100,
-                   max_iter2=100, initialization='NN',
+def graph_matching(S_A, S_B, distance, lam=0.5, alpha=0.5,
+                   max_iter1=100, max_iter2=100, initialization='NN',
                    similarity='exp(-x)', epsilon=1.0e-8, verbose=True):
     """Wrapper of the DSPFP algorithm to deal with streamlines. In
     addition to calling DSPFP, this function adds initializations of
@@ -18,13 +18,13 @@ def graph_matching(S_A, S_B, distance, alpha=0.5, max_iter1=100,
 
     dm_A = distance(S_A, S_A)
     dm_B = distance(S_B, S_B)
-    K = distance(S_A, S_B)
 
-    # Notice that the initialization transposes the matrix because the
-    # logic of DSPFP is DSPFP(B,A), which is opposite to that of our
-    # graph_matching(A,B):
+    # Notice that both K and the initialization transposes the matrix
+    # because the logic of DSPFP is DSPFP(B,A), which is opposite to
+    # that of our graph_matching(A,B):
+    K = distance(S_A, S_B).T
     if initialization == 'NN':
-        X_init = K.T
+        X_init = K
     elif initialization == 'random':
         X_init = np.random.uniform(size=(len(S_A), len(S_B))).T
     else:
@@ -62,10 +62,8 @@ def graph_matching(S_A, S_B, distance, alpha=0.5, max_iter1=100,
     # We perform DSPFP(B,A) and not DSPFP(A,B), because the original
     # algorithm has the opposite logic of what we need (see the
     # paper):
-    X = DSPFP_faster_K(sm_B, sm_A, K=K,
-                       alpha=alpha,
-                       max_iter1=max_iter1,
-                       max_iter2=max_iter2,
+    X = DSPFP_faster_K(sm_B, sm_A, K=K, lam=lam, alpha=alpha,
+                       max_iter1=max_iter1, max_iter2=max_iter2,
                        X=X_init, verbose=verbose)
 
     ga = greedy_assignment(X)
@@ -79,17 +77,18 @@ if __name__ == '__main__':
     np.random.seed(0)
 
     n_A = 100 # 1000
-    n_B = 100 # 10000
+    n_B = 1000 # 10000
     d = 2
+    lam = 0.9
 
     A = np.random.uniform(size=(n_A, d))
-    B = A + np.random.normal(size=(n_A, d)) * 0.01
+    B = np.random.uniform(size=(n_B, d))  # A + np.random.normal(size=(n_A, d)) * 0.01
 
     from functools import partial
     from distances import euclidean_distance, parallel_distance_computation
     distance = partial(parallel_distance_computation, distance=euclidean_distance)
 
-    corresponding_streamlines = graph_matching(A, B, distance)
+    corresponding_streamlines = graph_matching(A, B, distance, lam=lam)
 
     import matplotlib.pyplot as plt
     plt.interactive(True)
