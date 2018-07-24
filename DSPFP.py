@@ -127,6 +127,9 @@ def DSPFP_faster_K(A, B, K=0.0, lam=0.5, alpha=0.5, threshold1=1.0e-6,
                  threshold2=1.0e-6, X=None, Y=None, verbose=True,
                  max_iter1=100, max_iter2=100):
     """A faster and more efficient implementation of DSPFP().
+
+    A, B = cost matrices of the quadratic assignment part
+    K = cost matrix of the linear assignment part
     """
     size1 = A.shape[0]
     size2 = B.shape[0]
