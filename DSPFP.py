@@ -133,7 +133,7 @@ def DSPFP_faster_K(A, B, K=0.0, lam=0.5, alpha=0.5, threshold1=1.0e-6,
     """
     size1 = A.shape[0]
     size2 = B.shape[0]
-    if X is None:
+    if X is None or np.shape(X) == ():
         X = np.ones((size1, size2)) / (size1 * size2)
 
     if Y is None:
